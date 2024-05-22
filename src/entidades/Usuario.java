@@ -1,60 +1,35 @@
 package entidades;
 
 public class Usuario {
+    private int id;
+    private String nome;
+    private String senha;
+    private String login;
+    private String caminhoPasta;
 
-	private int IdUsuario;
-	private String NomeUsuario;
-	private String SenhaUsuario;
-	private String LoginUsuario;
-	private String CaminhoPasta;
-	
+    // Construtor com quatro Strings
+    public Usuario(String nome, String senha, String login, String caminhoPasta) {
+        this.nome = nome;
+        this.senha = senha;
+        this.login = login;
+        this.caminhoPasta = caminhoPasta;
+    }
 
-	public Usuario(String nomeUsuario, String senhaUsuario, String loginUsuario, String caminhoPasta) {
-		super();
-		NomeUsuario = nomeUsuario;
-		SenhaUsuario = senhaUsuario;
-		LoginUsuario = loginUsuario;
-		CaminhoPasta = caminhoPasta;
-	}
+    // Construtor com id e login
+    public Usuario(int id, String login) {
+        this.id = id;
+        this.login = login;
+    }
 
-	public int getIdUsuario() {
-		return IdUsuario;
-	}
-
-	public void setIdUsuario(int idUsuario) {
-		IdUsuario = idUsuario;
-	}
-
-	public String getNomeUsuario() {
-		return NomeUsuario;
-	}
-
-	public void setNomeUsuario(String nomeUsuario) {
-		NomeUsuario = nomeUsuario;
-	}
-
-	public String getSenhaUsuario() {
-		return SenhaUsuario;
-	}
-
-	public void setSenhaUsuario(String senhaUsuario) {
-		SenhaUsuario = senhaUsuario;
-	}
-
-	public String getLoginUsuario() {
-		return LoginUsuario;
-	}
-
-	public void setLoginUsuario(String loginUsuario) {
-		LoginUsuario = loginUsuario;
-	}
-
-	public String getCaminhoPasta() {
-		return CaminhoPasta;
-	}
-
-	public void setCaminhoPasta(String caminhoPasta) {
-		CaminhoPasta = caminhoPasta;
-	}
-
+    // Getters e Setters
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+    public String getSenha() { return senha; }
+    public void setSenha(String senha) { this.senha = senha; }
+    public String getLogin() { return login; }
+    public void setLogin(String login) { this.login = login; }
+    public String getCaminhoPasta() { return caminhoPasta; }
+    public void setCaminhoPasta(String caminhoPasta) { this.caminhoPasta = caminhoPasta; }
 }
