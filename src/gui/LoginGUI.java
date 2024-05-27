@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,65 +8,63 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
-import entidades.Administrador;
 import entidades.Usuario;
 import servicos.UsuarioServico;
 
 public class LoginGUI extends JFrame {
-    private JTextField userField;
-    private JPasswordField passField;
-    private JButton loginButton;
+	private static final long serialVersionUID = 1L;
+	private JTextField campoLogin;
+	private JPasswordField campoSenha;
+	private JButton botaoLogin;
+	private UsuarioServico servicoUsuario;
 
-    public LoginGUI() {
-        setTitle("Login");
-        setSize(300, 150);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null);
+	public LoginGUI() {
+		super("Login");
+		servicoUsuario = new UsuarioServico();
 
-        initUI();
-        setVisible(true);
-    }
+		setLayout(new GridLayout(3, 2));
 
-    private void initUI() {
-        JPanel panel = new JPanel(new GridLayout(3, 2));
-        panel.add(new JLabel("Username:"));
-        userField = new JTextField();
-        panel.add(userField);
+		add(new JLabel("Login:"));
+		campoLogin = new JTextField();
+		add(campoLogin);
 
-        panel.add(new JLabel("Password:"));
-        passField = new JPasswordField();
-        panel.add(passField);
+		add(new JLabel("Senha:"));
+		campoSenha = new JPasswordField();
+		add(campoSenha);
 
-        loginButton = new JButton("Login");
-        panel.add(new JLabel());  // Placeholder
-        panel.add(loginButton);
+		botaoLogin = new JButton("Login");
+		add(botaoLogin);
 
-        add(panel, BorderLayout.CENTER);
+		botaoLogin.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String login = campoLogin.getText();
+				String senha = new String(campoSenha.getPassword());
 
-        loginButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String username = userField.getText();
-                String password = new String(passField.getPassword());
+				try {
+					Usuario usuario = servicoUsuario.autenticarUsuario(login, senha);
+					JOptionPane.showMessageDialog(LoginGUI.this, "Bem-vindo " + usuario.getNomeUsuario());
+					// Navegar para a próxima tela, por exemplo:
+					//new GerenciamentoArquivoGUI().setVisible(true);
+					//dispose();
+					new GerenciamentoUsuarioGUI().setVisible(true);
+					dispose();
+				} catch (RuntimeException ex) {
+					JOptionPane.showMessageDialog(LoginGUI.this, ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		});
 
-                UsuarioServico usuarioServico = new UsuarioServico();
-                Usuario usuario = usuarioServico.autenticar(username, password);
+		setSize(300, 150);
+		setLocationRelativeTo(null);
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setVisible(true);
+	}
 
-                if (usuario != null) {
-                    dispose();
-                    if (usuario instanceof Administrador) {
-                        new FileManagementGUI((Administrador) usuario);
-                    } else {
-                        new FileManagementGUI(usuario);
-                    }
-                } else {
-                    JOptionPane.showMessageDialog(LoginGUI.this, "Invalid credentials", "Error", JOptionPane.ERROR_MESSAGE);
-                }
-            }
-        });
-    }
+	public static void main(String[] args) {
+		new LoginGUI();
+	}
 }
