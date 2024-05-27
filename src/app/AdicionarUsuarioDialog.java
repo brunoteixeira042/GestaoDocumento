@@ -1,4 +1,5 @@
 package app;
+
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -9,61 +10,79 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
 import entidades.Usuario;
+import gui.GerenciamentoUsuarioGUI;
 import servicos.UsuarioServico;
 
 public class AdicionarUsuarioDialog extends JDialog {
     private static final long serialVersionUID = 1L;
-	private JTextField nomeField;
-	private JTextField senhaField;
-	private JCheckBox isAdminCheckbox; // Adicionado um checkbox para selecionar se o usuário é um administrador
-	private JButton addButton;
-	private UsuarioServico usuarioServico;
+    private JTextField campoNome;
+    private JTextField campoSenha;
+    private JTextField campoLogin;
+    private JTextField campoCaminhoPasta;
+    private JCheckBox checkBoxAdmin;
+    private JButton botaoAdicionar;
+    private UsuarioServico servicoUsuario;
 
-	public AdicionarUsuarioDialog(JFrame parent) {
-		super(parent, "Adicionar Usuário", true);
-		usuarioServico = new UsuarioServico();
+    public AdicionarUsuarioDialog(JFrame parent) {
+        super(parent, "Adicionar Usuário", true);
+        servicoUsuario = new UsuarioServico();
 
-		setSize(300, 200); // Aumentei a altura para acomodar o novo checkbox
-		setLocationRelativeTo(parent);
-		setLayout(new GridLayout(4, 2)); // Aumentei o número de linhas no layout
+        setSize(300, 300);
+        setLocationRelativeTo(parent);
+        setLayout(new GridLayout(6, 2));
 
-		add(new JLabel("Nome de Usuário:"));
-		nomeField = new JTextField();
-		add(nomeField);
+        add(new JLabel("Nome do Usuário:"));
+        campoNome = new JTextField();
+        add(campoNome);
 
-		add(new JLabel("Senha:"));
-		senhaField = new JPasswordField();
-		add(senhaField);
+        add(new JLabel("Senha do Usuário:"));
+        campoSenha = new JTextField();
+        add(campoSenha);
 
-		// Adiciona um checkbox para selecionar se o usuário é um administrador
-		add(new JLabel("Administrador:"));
-		isAdminCheckbox = new JCheckBox();
-		add(isAdminCheckbox);
+        add(new JLabel("Login do Usuário:"));
+        campoLogin = new JTextField();
+        add(campoLogin);
 
-		addButton = new JButton("Adicionar");
-		add(new JLabel());
-		add(addButton);
+        add(new JLabel("Caminho da Pasta:"));
+        campoCaminhoPasta = new JTextField();
+        add(campoCaminhoPasta);
 
-		addButton.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				String nome = nomeField.getText();
-				String senha = senhaField.getText();
+        add(new JLabel("Administrador:"));
+        checkBoxAdmin = new JCheckBox();
+        add(checkBoxAdmin);
 
-				try {
-					usuarioServico.incluirUsuario(new Usuario(0, nome, senha, false)); // Cria um novo usuário com ID 0
-					dispose();
-				} catch (RuntimeException ex) {
-					JOptionPane.showMessageDialog(AdicionarUsuarioDialog.this, ex.getMessage(), "Erro",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		});
+        botaoAdicionar = new JButton("Adicionar");
+        add(new JLabel());  // Espaço reservado
+        add(botaoAdicionar);
 
-		setVisible(true);
-	}
+        botaoAdicionar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String nome = campoNome.getText();
+                String senha = campoSenha.getText();
+                String login = campoLogin.getText();
+                String caminhoPasta = campoCaminhoPasta.getText();
+                boolean isAdmin = checkBoxAdmin.isSelected();
+
+                if (nome.isEmpty() || senha.isEmpty() || login.isEmpty() || caminhoPasta.isEmpty()) {
+                    JOptionPane.showMessageDialog(AdicionarUsuarioDialog.this, "Todos os campos são obrigatórios.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                // Adicionar o usuário no banco de dados
+                Usuario novoUsuario = new Usuario(0, nome, senha, login, caminhoPasta, isAdmin);
+                servicoUsuario.adicionarUsuario(novoUsuario);
+
+                dispose();
+                if (parent instanceof GerenciamentoUsuarioGUI) {
+                    ((GerenciamentoUsuarioGUI) parent).atualizarListaUsuarios();
+                }
+            }
+        });
+
+        setVisible(true);
+    }
 }

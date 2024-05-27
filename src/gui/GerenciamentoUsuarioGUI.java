@@ -19,8 +19,8 @@ import entidades.Usuario;
 import servicos.UsuarioServico;
 
 public class GerenciamentoUsuarioGUI extends JFrame {
-	private static final long serialVersionUID = 1L;
-	private JTable tabelaUsuarios;
+    private static final long serialVersionUID = 1L;
+    private JTable tabelaUsuarios;
     private DefaultTableModel modeloTabela;
     private JButton botaoAdicionar, botaoRemover, botaoAtualizar;
     private UsuarioServico servicoUsuario;
@@ -90,7 +90,8 @@ public class GerenciamentoUsuarioGUI extends JFrame {
                 int linhaSelecionada = tabelaUsuarios.getSelectedRow();
                 if (linhaSelecionada >= 0) {
                     int idUsuario = (int) modeloTabela.getValueAt(linhaSelecionada, 0);
-                    new AtualizarUsuarioDialog(GerenciamentoUsuarioGUI.this, idUsuario);
+                    Usuario usuario = servicoUsuario.buscarUsuario(idUsuario);
+                    new AtualizarUsuarioDialog(GerenciamentoUsuarioGUI.this, usuario);
                 }
             }
         });
@@ -108,5 +109,9 @@ public class GerenciamentoUsuarioGUI extends JFrame {
                 usuario instanceof Administrador ? "Admin" : "Usuário"
             });
         }
+    }
+
+    public static void main(String[] args) {
+        new GerenciamentoUsuarioGUI();
     }
 }

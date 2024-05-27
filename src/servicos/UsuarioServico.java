@@ -12,6 +12,49 @@ import entidades.Usuario;
 
 public class UsuarioServico {
 
+    public void adicionarUsuario(Usuario usuario) {
+        String sql = "INSERT INTO tb_usuario (nome_usuario, senha_usuario, login_usuario, caminho_pasta, is_admin) VALUES (?, ?, ?, ?, ?)";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, usuario.getNomeUsuario());
+            stmt.setString(2, usuario.getSenhaUsuario());
+            stmt.setString(3, usuario.getLoginUsuario());
+            stmt.setString(4, usuario.getCaminhoPasta());
+            stmt.setBoolean(5, usuario.isAdmin());
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao adicionar usuário", e);
+        }
+    }
+
+    public List<Usuario> listarUsuarios() {
+        List<Usuario> usuarios = new ArrayList<>();
+        String sql = "SELECT * FROM tb_usuario";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                int id = rs.getInt("id_usuario");
+                String nome = rs.getString("nome_usuario");
+                String senha = rs.getString("senha_usuario");
+                String login = rs.getString("login_usuario");
+                String caminhoPasta = rs.getString("caminho_pasta");
+                boolean isAdmin = rs.getBoolean("is_admin");
+                usuarios.add(new Usuario(id, nome, senha, login, caminhoPasta, isAdmin));
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar usuários", e);
+        }
+        return usuarios;
+    }
+
+    public void excluirUsuario(int idUsuario) {
+        String sql = "DELETE FROM tb_usuario WHERE id_usuario = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir usuário", e);
+        }
+    }
+
     public Usuario autenticarUsuario(String login, String senha) {
         String sql = "SELECT * FROM tb_usuario WHERE login_usuario = ? AND senha_usuario = ?";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -20,12 +63,12 @@ public class UsuarioServico {
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
                     int id = rs.getInt("id_usuario");
-                    String username = rs.getString("login_usuario");
-                    String password = rs.getString("senha_usuario");
+                    String nome = rs.getString("nome_usuario");
+                    String caminhoPasta = rs.getString("caminho_pasta");
                     boolean isAdmin = rs.getBoolean("is_admin");
-                    return new Usuario(id, username, password, isAdmin);
+                    return new Usuario(id, nome, senha, login, caminhoPasta, isAdmin);
                 } else {
-                    throw new RuntimeException("Login ou senha inválidos");
+                    throw new RuntimeException("Usuário ou senha inválidos");
                 }
             }
         } catch (SQLException e) {
@@ -33,38 +76,18 @@ public class UsuarioServico {
         }
     }
 
-    public void incluirUsuario(Usuario usuario) {
-        String sql = "INSERT INTO tb_usuario (login_usuario, senha_usuario, is_admin) VALUES (?, ?, ?)";
+    public Usuario buscarUsuario(int idUsuario) {
+        String sql = "SELECT * FROM tb_usuario WHERE id_usuario = ?";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, usuario.getNomeUsuario());
-            stmt.setString(2, usuario.getSenhaUsuario());
-            stmt.setBoolean(3, usuario.isAdmin());
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao incluir usuário", e);
-        }
-    }
-
-    public void excluirUsuario(int id) {
-        String sql = "DELETE FROM tb_usuario WHERE id_usuario = ?";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, id);
-            stmt.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao excluir usuário", e);
-        }
-    }
-
-    public Usuario buscarUsuario(String username) {
-        String sql = "SELECT * FROM tb_usuario WHERE login_usuario = ?";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, username);
+            stmt.setInt(1, idUsuario);
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    int id = rs.getInt("id_usuario");
-                    String password = rs.getString("senha_usuario");
+                    String nome = rs.getString("nome_usuario");
+                    String senha = rs.getString("senha_usuario");
+                    String login = rs.getString("login_usuario");
+                    String caminhoPasta = rs.getString("caminho_pasta");
                     boolean isAdmin = rs.getBoolean("is_admin");
-                    return new Usuario(id, username, password, isAdmin);
+                    return new Usuario(idUsuario, nome, senha, login, caminhoPasta, isAdmin);
                 } else {
                     throw new RuntimeException("Usuário não encontrado");
                 }
@@ -73,26 +96,19 @@ public class UsuarioServico {
             throw new RuntimeException("Erro ao buscar usuário", e);
         }
     }
-    public List<Usuario> listarUsuarios() {
-        List<Usuario> usuarios = new ArrayList<>();
-        String sql = "SELECT id_usuario, login_usuario, senha_usuario, is_admin FROM tb_usuario"; // Ajuste os nomes conforme sua tabela
-        try (Connection conn = Conexao.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
 
-            while (rs.next()) {
-                int idUsuario = rs.getInt("id_usuario");
-                String loginUsuario = rs.getString("login_usuario");
-                String senhaUsuario = rs.getString("senha_usuario");
-                boolean isAdmin = rs.getBoolean("is_admin");
-
-                Usuario usuario = new Usuario(idUsuario, loginUsuario, senhaUsuario, isAdmin);
-                usuarios.add(usuario);
-            }
+    public void atualizarUsuario(Usuario usuario) {
+        String sql = "UPDATE tb_usuario SET nome_usuario = ?, senha_usuario = ?, login_usuario = ?, caminho_pasta = ?, is_admin = ? WHERE id_usuario = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, usuario.getNomeUsuario());
+            stmt.setString(2, usuario.getSenhaUsuario());
+            stmt.setString(3, usuario.getLoginUsuario());
+            stmt.setString(4, usuario.getCaminhoPasta());
+            stmt.setBoolean(5, usuario.isAdmin());
+            stmt.setInt(6, usuario.getIdUsuario());
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar usuários", e);
+            throw new RuntimeException("Erro ao atualizar usuário", e);
         }
-        return usuarios;
     }
-
 }

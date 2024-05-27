@@ -42,13 +42,15 @@ public class ArquivoServico {
     public List<Arquivo> listarArquivos() {
         List<Arquivo> arquivos = new ArrayList<>();
         String sql = "SELECT * FROM tb_arquivo";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql); ResultSet rs = stmt.executeQuery()) {
+        try (Connection conn = Conexao.getConexao();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
                 int id = rs.getInt("id_arquivo");
                 String nome = rs.getString("nome_arquivo");
                 String caminho = rs.getString("caminho_arquivo");
-                int idUsuario = rs.getInt("id_usuario");
-                boolean naLixeira = rs.getBoolean("na_lixeira");
+                int idUsuario = rs.getInt("UsuarioIdUsuario");
+                boolean naLixeira = rs.getBoolean("lixeira");
                 arquivos.add(new Arquivo(id, nome, caminho, idUsuario, naLixeira));
             }
         } catch (SQLException e) {
@@ -56,6 +58,7 @@ public class ArquivoServico {
         }
         return arquivos;
     }
+
 
     public void deletarArquivo(int idArquivo) {
         String sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
@@ -79,7 +82,7 @@ public class ArquivoServico {
                     String nomeArquivo = rs.getString("nome_arquivo");
                     String caminho = rs.getString("caminho_arquivo");
                     int idUsuario = rs.getInt("id_usuario");
-                    boolean naLixeira = rs.getBoolean("na_lixeira");
+                    boolean naLixeira = rs.getBoolean("lixeira");
                     return new Arquivo(id, nomeArquivo, caminho, idUsuario, naLixeira);
                 }
             }

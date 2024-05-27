@@ -12,55 +12,71 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 
+import entidades.Usuario;
 import gui.GerenciamentoUsuarioGUI;
 import servicos.UsuarioServico;
 
 public class AtualizarUsuarioDialog extends JDialog {
     private static final long serialVersionUID = 1L;
-	private JTextField campoUsuario;
+    private JTextField campoUsuario;
     private JPasswordField campoSenha;
+    private JTextField campoLogin;
+    private JTextField campoCaminhoPasta;
     private JCheckBox checkBoxAdmin;
     private JButton botaoSalvar;
     private UsuarioServico usuarioServico;
-    private int idUsuario;
+    private Usuario usuario;
 
-    public AtualizarUsuarioDialog(JFrame parent, int idUsuario) {
+    public AtualizarUsuarioDialog(JFrame parent, Usuario usuario) {
         super(parent, "Atualizar Usuário", true);
-        setUsuarioServico(new UsuarioServico());
-        this.setIdUsuario(idUsuario);
+        this.setUsuario(usuario);
+        usuarioServico = new UsuarioServico();
 
-        setSize(300, 200);
+        setSize(300, 300);
         setLocationRelativeTo(parent);
-        setLayout(new GridLayout(4, 2));
+        setLayout(new GridLayout(6, 2));
 
         add(new JLabel("Nome de Usuário:"));
-        campoUsuario = new JTextField();
+        campoUsuario = new JTextField(usuario.getNomeUsuario());
         add(campoUsuario);
 
         add(new JLabel("Senha:"));
-        campoSenha = new JPasswordField();
+        campoSenha = new JPasswordField(usuario.getSenhaUsuario());
         add(campoSenha);
+
+        add(new JLabel("Login:"));
+        campoLogin = new JTextField(usuario.getLoginUsuario());
+        add(campoLogin);
+
+        add(new JLabel("Caminho da Pasta:"));
+        campoCaminhoPasta = new JTextField(usuario.getCaminhoPasta());
+        add(campoCaminhoPasta);
 
         add(new JLabel("Administrador:"));
         checkBoxAdmin = new JCheckBox();
+        checkBoxAdmin.setSelected(usuario.isAdmin());
         add(checkBoxAdmin);
 
         botaoSalvar = new JButton("Salvar");
         add(new JLabel());  // Espaço reservado
         add(botaoSalvar);
 
-        // Carregar os dados do usuário
-        // Use servicoUsuario para obter os detalhes do usuário com o idUsuario
-
         botaoSalvar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                campoUsuario.getText();
-                new String(campoSenha.getPassword());
-                checkBoxAdmin.isSelected();
+                String novoNome = campoUsuario.getText();
+                String novaSenha = new String(campoSenha.getPassword());
+                String novoLogin = campoLogin.getText();
+                String novoCaminhoPasta = campoCaminhoPasta.getText();
+                boolean novoAdmin = checkBoxAdmin.isSelected();
 
-                // Lógica para atualizar usuário no banco de dados
-                // Use servicoUsuario
+                usuario.setNomeUsuario(novoNome);
+                usuario.setSenhaUsuario(novaSenha);
+                usuario.setLoginUsuario(novoLogin);
+                usuario.setCaminhoPasta(novoCaminhoPasta);
+                usuario.setAdmin(novoAdmin);
+
+                usuarioServico.atualizarUsuario(usuario);
 
                 dispose();
                 ((GerenciamentoUsuarioGUI) parent).atualizarListaUsuarios();
@@ -70,19 +86,11 @@ public class AtualizarUsuarioDialog extends JDialog {
         setVisible(true);
     }
 
-	public UsuarioServico getUsuarioServico() {
-		return usuarioServico;
+	public Usuario getUsuario() {
+		return usuario;
 	}
 
-	public void setUsuarioServico(UsuarioServico usuarioServico) {
-		this.usuarioServico = usuarioServico;
-	}
-
-	public int getIdUsuario() {
-		return idUsuario;
-	}
-
-	public void setIdUsuario(int idUsuario) {
-		this.idUsuario = idUsuario;
+	public void setUsuario(Usuario usuario) {
+		this.usuario = usuario;
 	}
 }
