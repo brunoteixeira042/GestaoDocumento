@@ -1,7 +1,8 @@
- package entidades;
+package entidades;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -10,100 +11,68 @@ import java.util.List;
 import Conexao.Conexao;
 
 public class Arquivo {
-<<<<<<< HEAD
-    private int IdArquivo;
-    private String NomeArquivo;
-    private String CaminhoArquivo;
-    private int UsuarioIdUsuario;
-    private boolean Lixeira;
 
-    public Arquivo(String nomeArquivo, String caminhoArquivo, int usuarioIdUsuario, boolean lixeira) {
-        this.NomeArquivo = nomeArquivo;
-        this.CaminhoArquivo = caminhoArquivo;
-        this.UsuarioIdUsuario = usuarioIdUsuario;
-        this.Lixeira = lixeira;
-    }
-
-    public int getIdArquivo() {
-        return IdArquivo;
-    }
-
-    public void setIdArquivo(int idArquivo) {
-        this.IdArquivo = idArquivo;
-    }
-=======
     private int idArquivo;
-    private String NomeArquivo;
-    private String CaminhoArquivo;
+    private String nomeArquivo;
+    private String caminhoArquivo;
     private int idUsuario;
     private boolean naLixeira;
-
-    // Construtores
 
     public Arquivo() {}
 
     public Arquivo(int id, String nome, String caminho, int idUsuario, boolean naLixeira) {
         this.idArquivo = id;
-        this.NomeArquivo = nome;
-        this.CaminhoArquivo = caminho;
+        this.nomeArquivo = nome;
+        this.caminhoArquivo = caminho;
         this.idUsuario = idUsuario;
         this.naLixeira = naLixeira;
     }
 
     public Arquivo(String nome, String caminho, int idUsuario, boolean naLixeira) {
-        this.NomeArquivo = nome;
-        this.CaminhoArquivo= caminho;
+        this.nomeArquivo = nome;
+        this.caminhoArquivo = caminho;
         this.idUsuario = idUsuario;
         this.naLixeira = naLixeira;
     }
 
-    // Getters e Setters
+    public int getIdArquivo() {
+        return idArquivo;
+    }
 
-    
+    public void setIdArquivo(int idArquivo) {
+        this.idArquivo = idArquivo;
+    }
+
+    public String getNomeArquivo() {
+        return nomeArquivo;
+    }
+
+    public void setNomeArquivo(String nomeArquivo) {
+        this.nomeArquivo = nomeArquivo;
+    }
+
+    public String getCaminhoArquivo() {
+        return caminhoArquivo;
+    }
+
+    public void setCaminhoArquivo(String caminhoArquivo) {
+        this.caminhoArquivo = caminhoArquivo;
+    }
+
     public int getIdUsuario() {
         return idUsuario;
     }
 
-    public int getIdArquivo() {
-		return idArquivo;
-	}
-
-	public void setIdArquivo(int idArquivo) {
-		this.idArquivo = idArquivo;
-	}
->>>>>>> cf67d02b28e10e785a28adfa09cc80ffa8fc1664
-
-    public String getNomeArquivo() {
-        return NomeArquivo;
+    public void setIdUsuario(int idUsuario) {
+        this.idUsuario = idUsuario;
     }
 
-    public void setNomeArquivo(String nomeArquivo) {
-        this.NomeArquivo = nomeArquivo;
+    public boolean isNaLixeira() {
+        return naLixeira;
     }
 
-    public String getCaminhoArquivo() {
-        return CaminhoArquivo;
-    }
-
-    public void setCaminhoArquivo(String caminhoArquivo) {
-        this.CaminhoArquivo = caminhoArquivo;
-    }
-
-<<<<<<< HEAD
-    public int getUsuarioIdUsuario() {
-        return UsuarioIdUsuario;
-    }
-
-    public void setUsuarioIdUsuario(int usuarioIdUsuario) {
-        this.UsuarioIdUsuario = usuarioIdUsuario;
-    }
-
-    public boolean isLixeira() {
-        return Lixeira;
-    }
-
-    public void setLixeira(boolean lixeira) {
-        this.Lixeira = lixeira;
+    public void setNaLixeira(boolean naLixeira) {
+        this.naLixeira = naLixeira;
     }
 
     public void incluirArquivo() {
@@ -111,8 +80,8 @@ public class Arquivo {
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, this.getNomeArquivo());
             stmt.setString(2, this.getCaminhoArquivo());
-            stmt.setInt(3, this.getUsuarioIdUsuario());
-            stmt.setBoolean(4, this.isLixeira());
+            stmt.setInt(3, this.getIdUsuario());
+            stmt.setBoolean(4, this.isNaLixeira());
             stmt.executeUpdate();
             System.out.println("Arquivo adicionado com sucesso.");
         } catch (SQLException e) {
@@ -128,20 +97,8 @@ public class Arquivo {
             System.out.println("Arquivo removido com sucesso.");
         } catch (SQLException e) {
             System.out.println("Erro ao remover Arquivo: " + e.getMessage());
-=======
-	public void setIdUsuario(int idUsuario) {
-        this.idUsuario = idUsuario;
+        }
     }
-
-    public boolean isNaLixeira() {
-        return naLixeira;
-    }
-
-    public void setNaLixeira(boolean naLixeira) {
-        this.naLixeira = naLixeira;
-    }
-
-    // Métodos de banco de dados
 
     public static List<Arquivo> listarArquivos() {
         List<Arquivo> arquivos = new ArrayList<>();
@@ -154,10 +111,10 @@ public class Arquivo {
             while (rs.next()) {
                 Arquivo arquivo = new Arquivo(
                         rs.getInt("id_arquivo"),
-                        rs.getString("nome"),
-                        rs.getString("caminho"),
-                        rs.getInt("id_usuario"),
-                        rs.getBoolean("na_lixeira")
+                        rs.getString("nome_arquivo"),
+                        rs.getString("caminho_arquivo"),
+                        rs.getInt("UsuarioIdUsuario"),
+                        rs.getBoolean("lixeira")
                 );
                 arquivos.add(arquivo);
             }
@@ -166,54 +123,5 @@ public class Arquivo {
         }
 
         return arquivos;
-    }
-
-    public void adicionarArquivo() {
-        String sql = "INSERT INTO tb_arquivo (nome_arquivo, caminho_arquivo, id_usuario, na_lixeira) VALUES (?, ?, ?)";
-
-        try (Connection conexao = Conexao.getConexao();
-             PreparedStatement stmt = conexao.prepareStatement(sql)) {
-
-            stmt.setString(1, NomeArquivo);
-            stmt.setString(2, CaminhoArquivo);
-            stmt.setBoolean(3, naLixeira);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void atualizarArquivo() {
-        String sql = "UPDATE tb_arquivo SET nome_arquivo = ?, caminho_arquivo = ?, UsuarioIdUsuario = ?, lixeira = ? WHERE id_arquivo = ?";
-
-        try (Connection conexao = Conexao.getConexao();
-             PreparedStatement stmt = conexao.prepareStatement(sql)) {
-
-            stmt.setString(1, NomeArquivo);
-            stmt.setString(2, CaminhoArquivo);
-            stmt.setInt(3, idUsuario);
-            stmt.setBoolean(4, naLixeira);
-            stmt.setInt(5, idArquivo);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public void removerArquivo() {
-        String sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
-
-        try (Connection conexao = Conexao.getConexao();
-             PreparedStatement stmt = conexao.prepareStatement(sql)) {
-
-            stmt.setInt(1, idArquivo);
-            stmt.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
->>>>>>> cf67d02b28e10e785a28adfa09cc80ffa8fc1664
-        }
     }
 }
