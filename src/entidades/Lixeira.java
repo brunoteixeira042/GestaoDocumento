@@ -13,7 +13,6 @@ public class Lixeira {
         this.arquivoIdArquivo = arquivoCodArquivo;
     }
 
-    // Getters e Setters
     public int getCodLixeira() {
         return IdLixeira;
     }
@@ -31,22 +30,22 @@ public class Lixeira {
     }
 
     public void adicionarArquivo(Connection conn, Arquivo arquivo) throws SQLException {
-        String sql = "INSERT INTO tb_lixeira (arquivo_id) VALUES (?)";
+        String sql = "INSERT INTO tb_lixeira (arquivo_id_arquivo) VALUES (?)";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, arquivo.getIdArquivo());
             pstmt.executeUpdate();
         }
-        arquivo.excluirArquivo(arquivo.getIdArquivo()); // Chamando excluirArquivo com o ID do arquivo
+        arquivo.setLixeira(true);
     }
 
     public void excluirArquivoDefinitivo(Connection conn, int codArquivo) throws SQLException {
-        String sql = "DELETE FROM tb_lixeira WHERE arquivo_id = ?";
+        String sql = "DELETE FROM tb_lixeira WHERE arquivo_id_arquivo = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codArquivo);
             pstmt.executeUpdate();
         }
 
-        sql = "DELETE FROM tb_arquivo WHERE id = ?";
+        sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codArquivo);
             pstmt.executeUpdate();
@@ -54,13 +53,13 @@ public class Lixeira {
     }
 
     public void restaurarArquivo(Connection conn, int codArquivo) throws SQLException {
-        String sql = "DELETE FROM tb_lixeira WHERE arquivo_id = ?";
+        String sql = "DELETE FROM tb_lixeira WHERE arquivo_id_arquivo = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codArquivo);
             pstmt.executeUpdate();
         }
 
-        sql = "UPDATE tb_arquivo SET lixeira = FALSE WHERE id = ?";
+        sql = "UPDATE tb_arquivo SET lixeira = 0 WHERE id_arquivo = ?";
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codArquivo);
             pstmt.executeUpdate();
