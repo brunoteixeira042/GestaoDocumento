@@ -4,10 +4,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class Lixeira {
-    private int IdLixeira;
-    private int arquivoIdArquivo;
+import Conexao.Conexao;
 
+public class Lixeira {
+
+<<<<<<< HEAD
     public Lixeira(int codLixeira, int arquivoCodArquivo) {
         this.IdLixeira = codLixeira;
         this.arquivoIdArquivo = arquivoCodArquivo;
@@ -63,6 +64,25 @@ public class Lixeira {
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, codArquivo);
             pstmt.executeUpdate();
+=======
+    public void adicionarArquivo(int idDoArquivo) {
+        String sql = "INSERT INTO tb_lixeira (id_arquivo) VALUES (?)";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idDoArquivo);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao adicionar arquivo na lixeira", e);
+        }
+    }
+
+    public void removerArquivo(int idDoArquivo) {
+        String sql = "DELETE FROM tb_lixeira WHERE id_arquivo = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idDoArquivo);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao remover arquivo da lixeira", e);
+>>>>>>> cf67d02b28e10e785a28adfa09cc80ffa8fc1664
         }
     }
 }
