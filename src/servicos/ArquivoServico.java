@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +15,20 @@ public class ArquivoServico {
 
     public void adicionarArquivo(String nome, String caminho, int UsuarioIdUsuario, boolean naLixeira) {
         String sql = "INSERT INTO tb_arquivo (nome_arquivo, caminho_arquivo, UsuarioIdUsuario, lixeira) VALUES (?, ?, ?, ?)";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, nome);
             stmt.setString(2, caminho);
             stmt.setInt(3, UsuarioIdUsuario);
             stmt.setBoolean(4, naLixeira);
             stmt.executeUpdate();
+            
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                int idArquivo = rs.getInt(1);
+                if (naLixeira) {
+                    adicionarArquivoALixeira(idArquivo);
+                }
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao adicionar arquivo", e);
         }
@@ -35,7 +44,7 @@ public class ArquivoServico {
                         rs.getInt("id_arquivo"),
                         rs.getString("nome_arquivo"),
                         rs.getString("caminho_arquivo"),
-                        rs.getInt("UsuarioIdUsuario"), 
+                        rs.getInt("UsuarioIdUsuario"),
                         rs.getBoolean("lixeira")
                     );
                 }
@@ -47,6 +56,7 @@ public class ArquivoServico {
     }
 
     public void excluirArquivo(int idArquivo) {
+        removerArquivoDaLixeira(idArquivo);
         String sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, idArquivo);
@@ -56,29 +66,27 @@ public class ArquivoServico {
         }
     }
 
-    public List<Arquivo> listarArquivosPorUsuario(int idUsuario) {
+    public List<Arquivo> listarArquivos() {
         List<Arquivo> arquivos = new ArrayList<>();
-        String sql = "SELECT * FROM tb_arquivo WHERE UsuarioIdUsuario = ?";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, idUsuario);
-            try (ResultSet rs = stmt.executeQuery()) {
-                while (rs.next()) {
-                    Arquivo arquivo = new Arquivo(
+        String sql = "SELECT * FROM tb_arquivo";
+        try (Connection conexao = Conexao.getConexao();
+             Statement stmt = conexao.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Arquivo arquivo = new Arquivo(
                         rs.getInt("id_arquivo"),
                         rs.getString("nome_arquivo"),
                         rs.getString("caminho_arquivo"),
                         rs.getInt("UsuarioIdUsuario"),
                         rs.getBoolean("lixeira")
-                    );
-                    arquivos.add(arquivo);
-                }
+                );
+                arquivos.add(arquivo);
             }
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar arquivos por usuário", e);
+            e.printStackTrace();
         }
         return arquivos;
     }
-
 
     public void atualizarArquivo(Arquivo arquivo) {
         String sql = "UPDATE tb_arquivo SET nome_arquivo = ?, caminho_arquivo = ?, UsuarioIdUsuario = ?, lixeira = ? WHERE id_arquivo = ?";
@@ -89,24 +97,56 @@ public class ArquivoServico {
             stmt.setBoolean(4, arquivo.isNaLixeira());
             stmt.setInt(5, arquivo.getIdArquivo());
             stmt.executeUpdate();
+
+            if (arquivo.isNaLixeira()) {
+                adicionarArquivoALixeira(arquivo.getIdArquivo());
+            } else {
+                removerArquivoDaLixeira(arquivo.getIdArquivo());
+            }
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao atualizar arquivo", e);
         }
     }
 
-    public void recuperarArquivoDaLixeira(int idArquivo) {
-        String deleteSql = "DELETE FROM tb_lixeira WHERE arquivo_id_arquivo = ?";
-        String updateSql = "UPDATE tb_arquivo SET lixeira = false WHERE id_arquivo = ?";
-        try (Connection conexao = Conexao.getConexao();
-             PreparedStatement deleteStmt = conexao.prepareStatement(deleteSql);
-             PreparedStatement updateStmt = conexao.prepareStatement(updateSql)) {
-            deleteStmt.setInt(1, idArquivo);
-            deleteStmt.executeUpdate();
-
-            updateStmt.setInt(1, idArquivo);
-            updateStmt.executeUpdate();
+    private void adicionarArquivoALixeira(int idArquivo) {
+        String sql = "INSERT INTO tb_lixeira (arquivo_id_arquivo) VALUES (?)";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idArquivo);
+            stmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao recuperar arquivo da lixeira", e);
+            throw new RuntimeException("Erro ao adicionar arquivo à lixeira", e);
         }
+    }
+
+    private void removerArquivoDaLixeira(int idArquivo) {
+        String sql = "DELETE FROM tb_lixeira WHERE arquivo_id_arquivo = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idArquivo);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao remover arquivo da lixeira", e);
+        }
+    }
+
+    public List<Arquivo> listarArquivosNaLixeira() {
+        List<Arquivo> arquivosNaLixeira = new ArrayList<>();
+        String sql = "SELECT * FROM tb_arquivo WHERE lixeira = true";
+        try (Connection conexao = Conexao.getConexao();
+             Statement stmt = conexao.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                Arquivo arquivo = new Arquivo(
+                        rs.getInt("id_arquivo"),
+                        rs.getString("nome_arquivo"),
+                        rs.getString("caminho_arquivo"),
+                        rs.getInt("UsuarioIdUsuario"),
+                        rs.getBoolean("lixeira")
+                );
+                arquivosNaLixeira.add(arquivo);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return arquivosNaLixeira;
     }
 }

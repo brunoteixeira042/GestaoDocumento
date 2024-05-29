@@ -1,28 +1,18 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.FlowLayout;
+import entidades.Arquivo;
+import entidades.Usuario;
+import servicos.ArquivoServico;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.List;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import entidades.Arquivo;
-import entidades.Usuario;
-import servicos.ArquivoServico;
-
 public class GerenciamentoArquivoGUI extends JFrame {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -803695865767720747L;
 	private final ArquivoServico arquivoServico = new ArquivoServico();
     private final Usuario usuarioLogado;
     private JList<String> listaArquivos;
@@ -35,115 +25,113 @@ public class GerenciamentoArquivoGUI extends JFrame {
         setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        initComponents();
-    }
 
-    private void initComponents() {
-        Container container = getContentPane();
-        container.setLayout(new BorderLayout());
-
-        JPanel panelBotoes = new JPanel();
-        panelBotoes.setLayout(new FlowLayout());
-
-        JButton btnAdicionar = new JButton("Adicionar Arquivo");
-        JButton btnExcluir = new JButton("Excluir Arquivo");
-        JButton btnLixeira = new JButton("Lixeira");
-        JButton btnEditarArquivo = new JButton("Editar Arquivo");
-
-        if (usuarioLogado.isAdmin()) {
-            JButton btnEditarUsuarios = new JButton("Editar Usuários");
-            btnEditarUsuarios.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    // Lógica para abrir a interface de edição de usuários
-                    new GerenciamentoUsuarioGUI().setVisible(true);
-                }
-            });
-            panelBotoes.add(btnEditarUsuarios);
-        }
-
-        panelBotoes.add(btnAdicionar);
-        panelBotoes.add(btnExcluir);
-        panelBotoes.add(btnLixeira);
-        panelBotoes.add(btnEditarArquivo);
-
-        container.add(panelBotoes, BorderLayout.NORTH);
+        JPanel painelPrincipal = new JPanel(new BorderLayout());
 
         listModel = new DefaultListModel<>();
         listaArquivos = new JList<>(listModel);
         JScrollPane scrollPane = new JScrollPane(listaArquivos);
-        container.add(scrollPane, BorderLayout.CENTER);
+        painelPrincipal.add(scrollPane, BorderLayout.CENTER);
 
-        atualizarListaArquivos();
+        JPanel painelBotoes = new JPanel();
+        JButton botaoAdicionar = new JButton("Adicionar Arquivo");
+        JButton botaoExcluir = new JButton("Excluir Arquivo");
+        JButton botaoEditar = new JButton("Editar Arquivo");
+        JButton botaoLixeira = new JButton("Lixeira");
+        JButton botaoSair = new JButton("Sair");
 
-        btnAdicionar.addActionListener(new ActionListener() {
+        painelBotoes.add(botaoAdicionar);
+        painelBotoes.add(botaoExcluir);
+        painelBotoes.add(botaoEditar);
+        painelBotoes.add(botaoLixeira);
+        painelBotoes.add(botaoSair);
+
+        painelPrincipal.add(painelBotoes, BorderLayout.SOUTH);
+
+        if (usuarioLogado.isAdmin()) {
+            JButton botaoGerenciarUsuarios = new JButton("Gerenciar Usuários");
+            painelBotoes.add(botaoGerenciarUsuarios);
+
+            botaoGerenciarUsuarios.addActionListener(e -> {
+                // Código para abrir a tela de gerenciamento de usuários
+                new GerenciamentoUsuarioGUI().setVisible(true);
+            });
+        }
+
+        botaoAdicionar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 JFileChooser fileChooser = new JFileChooser();
-                int returnValue = fileChooser.showOpenDialog(null);
-                if (returnValue == JFileChooser.APPROVE_OPTION) {
-                    File selectedFile = fileChooser.getSelectedFile();
-                    String nome = selectedFile.getName();
-                    String caminho = selectedFile.getAbsolutePath();
+                int result = fileChooser.showOpenDialog(GerenciamentoArquivoGUI.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File arquivoSelecionado = fileChooser.getSelectedFile();
+                    String nome = arquivoSelecionado.getName();
+                    String caminho = arquivoSelecionado.getAbsolutePath();
                     arquivoServico.adicionarArquivo(nome, caminho, usuarioLogado.getIdUsuario(), false);
                     atualizarListaArquivos();
                 }
             }
         });
 
-        btnExcluir.addActionListener(new ActionListener() {
+        botaoExcluir.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex = listaArquivos.getSelectedIndex();
                 if (selectedIndex != -1) {
                     Arquivo arquivoSelecionado = arquivos.get(selectedIndex);
-                    arquivoServico.excluirArquivo(arquivoSelecionado.getIdArquivo());
+                    arquivoSelecionado.setNaLixeira(true);
+                    arquivoServico.atualizarArquivo(arquivoSelecionado);
                     atualizarListaArquivos();
+                } else {
+                    JOptionPane.showMessageDialog(GerenciamentoArquivoGUI.this, "Selecione um arquivo para excluir.");
                 }
             }
         });
 
-        btnLixeira.addActionListener(new ActionListener() {
+        botaoEditar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 int selectedIndex = listaArquivos.getSelectedIndex();
                 if (selectedIndex != -1) {
                     Arquivo arquivoSelecionado = arquivos.get(selectedIndex);
-                    int opcao = JOptionPane.showConfirmDialog(null, "Deseja excluir permanentemente ou restaurar o arquivo?", "Lixeira", JOptionPane.YES_NO_OPTION);
-                    if (opcao == JOptionPane.YES_OPTION) {
-                        arquivoServico.excluirArquivo(arquivoSelecionado.getIdArquivo());
-                    } else if (opcao == JOptionPane.NO_OPTION) {
-                        arquivoServico.recuperarArquivoDaLixeira(arquivoSelecionado.getIdArquivo());
-                    }
-                    atualizarListaArquivos();
-                }
-            }
-        });
-
-        btnEditarArquivo.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                int selectedIndex = listaArquivos.getSelectedIndex();
-                if (selectedIndex != -1) {
-                    Arquivo arquivoSelecionado = arquivos.get(selectedIndex);
-                    String novoNome = JOptionPane.showInputDialog("Novo nome do arquivo:", arquivoSelecionado.getNomeArquivo());
+                    String novoNome = JOptionPane.showInputDialog(GerenciamentoArquivoGUI.this, "Edite o nome do arquivo:", arquivoSelecionado.getNomeArquivo());
                     if (novoNome != null && !novoNome.trim().isEmpty()) {
                         arquivoSelecionado.setNomeArquivo(novoNome);
                         arquivoServico.atualizarArquivo(arquivoSelecionado);
                         atualizarListaArquivos();
                     }
                 } else {
-                    JOptionPane.showMessageDialog(null, "Selecione um arquivo para editar.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                    JOptionPane.showMessageDialog(GerenciamentoArquivoGUI.this, "Selecione um arquivo para editar.");
                 }
             }
         });
+
+        botaoLixeira.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new LixeiraGUI(usuarioLogado).setVisible(true);
+            }
+        });
+
+        botaoSair.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose();
+                new LoginGUI().setVisible(true);
+            }
+        });
+
+        add(painelPrincipal);
+        atualizarListaArquivos();
     }
 
-    private void atualizarListaArquivos() {
+    public void atualizarListaArquivos() {
+        arquivos = arquivoServico.listarArquivos();
         listModel.clear();
-        arquivos = arquivoServico.listarArquivosPorUsuario(usuarioLogado.getIdUsuario());
         for (Arquivo arquivo : arquivos) {
-            listModel.addElement(arquivo.getNomeArquivo());
+            if (!arquivo.isNaLixeira()) {
+                listModel.addElement(arquivo.getNomeArquivo());
+            }
         }
     }
 }
