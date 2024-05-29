@@ -1,18 +1,12 @@
 package gui;
 
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-
 import entidades.Usuario;
 import servicos.UsuarioServico;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class LoginGUI extends JFrame {
     private static final long serialVersionUID = 1L;
@@ -48,8 +42,7 @@ public class LoginGUI extends JFrame {
                     Usuario usuario = servicoUsuario.autenticarUsuario(login, senha);
                     if (usuario != null) {
                         JOptionPane.showMessageDialog(LoginGUI.this, "Bem-vindo " + usuario.getNomeUsuario());
-                        // Navegar para a próxima tela, por exemplo:
-                        new GerenciamentoArquivoGUI().setVisible(true);
+                        new GerenciamentoArquivoGUI(usuario).setVisible(true);
                         dispose();
                     } else {
                         JOptionPane.showMessageDialog(LoginGUI.this, "Usuário ou senha inválidos", "Erro", JOptionPane.ERROR_MESSAGE);

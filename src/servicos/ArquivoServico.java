@@ -12,12 +12,12 @@ import entidades.Arquivo;
 
 public class ArquivoServico {
 
-    public void adicionarArquivo(String nome, String caminho, int idUsuario, boolean naLixeira) {
-        String sql = "INSERT INTO tb_arquivo (nome_arquivo, caminho_arquivo, id_usuario, lixeira) VALUES (?, ?, ?, ?)";
+    public void adicionarArquivo(String nome, String caminho, int UsuarioIdUsuario, boolean naLixeira) {
+        String sql = "INSERT INTO tb_arquivo (nome_arquivo, caminho_arquivo, UsuarioIdUsuario, lixeira) VALUES (?, ?, ?, ?)";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, nome);
             stmt.setString(2, caminho);
-            stmt.setInt(3, idUsuario);
+            stmt.setInt(3, UsuarioIdUsuario);
             stmt.setBoolean(4, naLixeira);
             stmt.executeUpdate();
         } catch (SQLException e) {
@@ -25,8 +25,63 @@ public class ArquivoServico {
         }
     }
 
+    public Arquivo obterArquivoPorNome(String nome) {
+        String sql = "SELECT * FROM tb_arquivo WHERE nome_arquivo = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nome);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return new Arquivo(
+                        rs.getInt("id_arquivo"),
+                        rs.getString("nome_arquivo"),
+                        rs.getString("caminho_arquivo"),
+                        rs.getInt("UsuarioIdUsuario"), 
+                        rs.getBoolean("lixeira")
+                    );
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao obter arquivo por nome", e);
+        }
+        return null;
+    }
+
+    public void excluirArquivo(int idArquivo) {
+        String sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idArquivo);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao excluir arquivo", e);
+        }
+    }
+
+    public List<Arquivo> listarArquivosPorUsuario(int idUsuario) {
+        List<Arquivo> arquivos = new ArrayList<>();
+        String sql = "SELECT * FROM tb_arquivo WHERE UsuarioIdUsuario = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, idUsuario);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    Arquivo arquivo = new Arquivo(
+                        rs.getInt("id_arquivo"),
+                        rs.getString("nome_arquivo"),
+                        rs.getString("caminho_arquivo"),
+                        rs.getInt("UsuarioIdUsuario"),
+                        rs.getBoolean("lixeira")
+                    );
+                    arquivos.add(arquivo);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao listar arquivos por usuário", e);
+        }
+        return arquivos;
+    }
+
+
     public void atualizarArquivo(Arquivo arquivo) {
-        String sql = "UPDATE tb_arquivo SET nome_arquivo = ?, caminho_arquivo = ?, id_usuario = ?, lixeira = ? WHERE id_arquivo = ?";
+        String sql = "UPDATE tb_arquivo SET nome_arquivo = ?, caminho_arquivo = ?, UsuarioIdUsuario = ?, lixeira = ? WHERE id_arquivo = ?";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, arquivo.getNomeArquivo());
             stmt.setString(2, arquivo.getCaminhoArquivo());
@@ -39,57 +94,19 @@ public class ArquivoServico {
         }
     }
 
-    public List<Arquivo> listarArquivos() {
-        List<Arquivo> arquivos = new ArrayList<>();
-        String sql = "SELECT * FROM tb_arquivo";
-        try (Connection conn = Conexao.getConexao();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-            while (rs.next()) {
-                int id = rs.getInt("id_arquivo");
-                String nome = rs.getString("nome_arquivo");
-                String caminho = rs.getString("caminho_arquivo");
-                int idUsuario = rs.getInt("UsuarioIdUsuario");
-                boolean naLixeira = rs.getBoolean("lixeira");
-                arquivos.add(new Arquivo(id, nome, caminho, idUsuario, naLixeira));
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao listar arquivos", e);
-        }
-        return arquivos;
-    }
+    public void recuperarArquivoDaLixeira(int idArquivo) {
+        String deleteSql = "DELETE FROM tb_lixeira WHERE arquivo_id_arquivo = ?";
+        String updateSql = "UPDATE tb_arquivo SET lixeira = false WHERE id_arquivo = ?";
+        try (Connection conexao = Conexao.getConexao();
+             PreparedStatement deleteStmt = conexao.prepareStatement(deleteSql);
+             PreparedStatement updateStmt = conexao.prepareStatement(updateSql)) {
+            deleteStmt.setInt(1, idArquivo);
+            deleteStmt.executeUpdate();
 
-
-    public void deletarArquivo(int idArquivo) {
-        String sql = "DELETE FROM tb_arquivo WHERE id_arquivo = ?";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setInt(1, idArquivo);
-            stmt.executeUpdate();
+            updateStmt.setInt(1, idArquivo);
+            updateStmt.executeUpdate();
         } catch (SQLException e) {
-            throw new RuntimeException("Erro ao deletar arquivo", e);
+            throw new RuntimeException("Erro ao recuperar arquivo da lixeira", e);
         }
     }
-    
-    
-    public Arquivo obterArquivoPorNome(String nome) {
-        String sql = "SELECT * FROM tb_arquivo WHERE nome_arquivo = ?";
-        try (Connection conn = Conexao.getConexao(); 
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, nome);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int id = rs.getInt("id_arquivo");
-                    String nomeArquivo = rs.getString("nome_arquivo");
-                    String caminho = rs.getString("caminho_arquivo");
-                    int idUsuario = rs.getInt("id_usuario");
-                    boolean naLixeira = rs.getBoolean("lixeira");
-                    return new Arquivo(id, nomeArquivo, caminho, idUsuario, naLixeira);
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao obter arquivo por nome", e);
-        }
-        return null;
-    }
-
 }

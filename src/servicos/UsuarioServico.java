@@ -111,4 +111,6 @@ public class UsuarioServico {
             throw new RuntimeException("Erro ao atualizar usuário", e);
         }
     }
+    
+
 }
