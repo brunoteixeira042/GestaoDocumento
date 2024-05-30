@@ -13,7 +13,7 @@ import javax.swing.JTextField;
 
 import servicos.ArquivoServico;
 
-public class AdicionarArquivoDialog extends JDialog {
+//public class AdicionarArquivoDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 	private JTextField campoNome;
     private JTextField campoCaminho;

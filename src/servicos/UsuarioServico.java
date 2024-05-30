@@ -13,7 +13,7 @@ import entidades.Usuario;
 public class UsuarioServico {
 
     public void adicionarUsuario(Usuario usuario) {
-        String sql = "INSERT INTO tb_usuario (nome_usuario, senha_usuario, login_usuario, caminho_pasta, is_admin) VALUES (?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO tb_usuario (nome_usuario, senha_usuario, login_usuario, caminho_pasta,is_admin) VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, usuario.getNomeUsuario());
             stmt.setString(2, usuario.getSenhaUsuario());

@@ -15,7 +15,7 @@ import entidades.Arquivo;
 import gui.GerenciamentoArquivoGUI;
 import servicos.ArquivoServico;
 
-public class AtualizarArquivoDialog extends JDialog {
+///public class AtualizarArquivoDialog extends JDialog {
     private static final long serialVersionUID = 1L;
 	private JTextField campoNome;
     private JTextField campoCaminho;

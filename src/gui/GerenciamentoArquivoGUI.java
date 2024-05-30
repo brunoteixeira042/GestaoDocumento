@@ -109,9 +109,10 @@ public class GerenciamentoArquivoGUI extends JFrame {
         botaoLixeira.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new LixeiraGUI(usuarioLogado).setVisible(true);
+                new LixeiraGUI(usuarioLogado,GerenciamentoArquivoGUI.this).setVisible(true);
             }
         });
+
 
         botaoSair.addActionListener(new ActionListener() {
             @Override
