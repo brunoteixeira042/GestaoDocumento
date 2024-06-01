@@ -14,7 +14,6 @@ import javax.swing.table.DefaultTableModel;
 
 import app.AdicionarUsuarioDialog;
 import app.AtualizarUsuarioDialog;
-import entidades.Administrador;
 import entidades.Usuario;
 import servicos.UsuarioServico;
 
@@ -68,7 +67,7 @@ public class GerenciamentoUsuarioGUI extends JFrame {
         botaoAdicionar.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AdicionarUsuarioDialog(GerenciamentoUsuarioGUI.this);
+                new AdicionarUsuarioDialog(GerenciamentoUsuarioGUI.this, servicoUsuario);
             }
         });
 
@@ -95,6 +94,7 @@ public class GerenciamentoUsuarioGUI extends JFrame {
                 }
             }
         });
+
     }
 
     public void atualizarListaUsuarios() {
@@ -106,7 +106,7 @@ public class GerenciamentoUsuarioGUI extends JFrame {
             modeloTabela.addRow(new Object[]{
                 usuario.getIdUsuario(),
                 usuario.getNomeUsuario(),
-                usuario instanceof Administrador ? "Admin" : "Usuário"
+                usuario.isAdmin() ? "Admin" : "Usuário"
             });
         }
     }

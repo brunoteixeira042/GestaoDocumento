@@ -21,18 +21,17 @@ public class AdicionarUsuarioDialog extends JDialog {
     private JTextField campoNome;
     private JTextField campoSenha;
     private JTextField campoLogin;
-    private JTextField campoCaminhoPasta;
     private JCheckBox checkBoxAdmin;
     private JButton botaoAdicionar;
     private UsuarioServico servicoUsuario;
 
-    public AdicionarUsuarioDialog(JFrame parent) {
+    public AdicionarUsuarioDialog(JFrame parent, UsuarioServico usuarioServico) {
         super(parent, "Adicionar Usuário", true);
-        servicoUsuario = new UsuarioServico();
+        this.servicoUsuario = usuarioServico;
 
-        setSize(300, 300);
+        setSize(300, 200);
         setLocationRelativeTo(parent);
-        setLayout(new GridLayout(6, 2));
+        setLayout(new GridLayout(5, 2));
 
         add(new JLabel("Nome do Usuário:"));
         campoNome = new JTextField();
@@ -45,10 +44,6 @@ public class AdicionarUsuarioDialog extends JDialog {
         add(new JLabel("Login do Usuário:"));
         campoLogin = new JTextField();
         add(campoLogin);
-
-        add(new JLabel("Caminho da Pasta:"));
-        campoCaminhoPasta = new JTextField();
-        add(campoCaminhoPasta);
 
         add(new JLabel("Administrador:"));
         checkBoxAdmin = new JCheckBox();
@@ -64,16 +59,15 @@ public class AdicionarUsuarioDialog extends JDialog {
                 String nome = campoNome.getText();
                 String senha = campoSenha.getText();
                 String login = campoLogin.getText();
-                String caminhoPasta = campoCaminhoPasta.getText();
                 boolean isAdmin = checkBoxAdmin.isSelected();
 
-                if (nome.isEmpty() || senha.isEmpty() || login.isEmpty() || caminhoPasta.isEmpty()) {
+                if (nome.isEmpty() || senha.isEmpty() || login.isEmpty()) {
                     JOptionPane.showMessageDialog(AdicionarUsuarioDialog.this, "Todos os campos são obrigatórios.", "Erro", JOptionPane.ERROR_MESSAGE);
                     return;
                 }
 
-                // Adicionar o usuário no banco de dados
-                Usuario novoUsuario = new Usuario(0, nome, senha, login, caminhoPasta, isAdmin);
+                // Adicionar o usuário usando o serviço de usuário fornecido
+                Usuario novoUsuario = new Usuario(0, nome, senha, login, isAdmin);
                 servicoUsuario.adicionarUsuario(novoUsuario);
 
                 dispose();

@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-
 import Conexao.Conexao;
 import entidades.Usuario;
 
@@ -55,27 +54,6 @@ public class UsuarioServico {
         }
     }
 
-    public Usuario autenticarUsuario(String login, String senha) {
-        String sql = "SELECT * FROM tb_usuario WHERE login_usuario = ? AND senha_usuario = ?";
-        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, login);
-            stmt.setString(2, senha);
-            try (ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    int id = rs.getInt("id_usuario");
-                    String nome = rs.getString("nome_usuario");
-                    String caminhoPasta = rs.getString("caminho_pasta");
-                    boolean isAdmin = rs.getBoolean("is_admin");
-                    return new Usuario(id, nome, senha, login, caminhoPasta, isAdmin);
-                } else {
-                    throw new RuntimeException("Usuário ou senha inválidos");
-                }
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao autenticar usuário", e);
-        }
-    }
-
     public Usuario buscarUsuario(int idUsuario) {
         String sql = "SELECT * FROM tb_usuario WHERE id_usuario = ?";
         try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -111,6 +89,26 @@ public class UsuarioServico {
             throw new RuntimeException("Erro ao atualizar usuário", e);
         }
     }
+    public Usuario autenticarUsuario(String login, String senha) {
+        String sql = "SELECT * FROM tb_usuario WHERE login_usuario = ? AND senha_usuario = ?";
+        try (Connection conn = Conexao.getConexao(); PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, login);
+            stmt.setString(2, senha);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    int id = rs.getInt("id_usuario");
+                    String nome = rs.getString("nome_usuario");
+                    String caminhoPasta = rs.getString("caminho_pasta");
+                    boolean isAdmin = rs.getBoolean("is_admin");
+                    return new Usuario(id, nome, senha, login, caminhoPasta, isAdmin);
+                } else {
+                    return null; // Se não encontrar usuário com o login e senha fornecidos, retorna null
+                }
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao autenticar usuário", e);
+        }
+    }
     
-
+    
 }

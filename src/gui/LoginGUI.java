@@ -19,7 +19,7 @@ public class LoginGUI extends JFrame {
         super("Login");
         servicoUsuario = new UsuarioServico();
 
-        setLayout(new GridLayout(3, 2));
+        setLayout(new GridLayout(8, 2));
 
         add(new JLabel("Login:"));
         campoLogin = new JTextField();
@@ -53,7 +53,7 @@ public class LoginGUI extends JFrame {
             }
         });
 
-        setSize(300, 150);
+        setSize(500, 300);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
