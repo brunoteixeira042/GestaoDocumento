@@ -81,7 +81,7 @@ public class LixeiraGUI extends JFrame {
 	}
 
 	private void atualizarListaArquivosNaLixeira() {
-		arquivosNaLixeira = arquivoServico.listarArquivosNaLixeira();
+		arquivosNaLixeira = arquivoServico.listarArquivosNaLixeira(usuarioLogado.getIdUsuario());
 		listModel.clear();
 		for (Arquivo arquivo : arquivosNaLixeira) {
 			listModel.addElement(arquivo.getNomeArquivo());

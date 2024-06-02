@@ -127,7 +127,7 @@ public class GerenciamentoArquivoGUI extends JFrame {
     }
 
     public void atualizarListaArquivos() {
-        arquivos = arquivoServico.listarArquivos();
+        arquivos = arquivoServico.listarArquivos(usuarioLogado.getIdUsuario());
         listModel.clear();
         for (Arquivo arquivo : arquivos) {
             if (!arquivo.isNaLixeira()) {
@@ -135,4 +135,5 @@ public class GerenciamentoArquivoGUI extends JFrame {
             }
         }
     }
+
 }
